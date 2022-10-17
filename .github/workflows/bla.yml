@@ -1,0 +1,26 @@
+name: Release to staging
+on:
+  push:
+    branches:
+      - staging*
+jobs:
+  publish:
+    name: Install and publish on staging channel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - uses: expo/expo-github-action@v5
+        with:
+          expo-version: 3.x
+          expo-username: ${{ secrets.EXPO_CLI_USERNAME }}
+          expo-password: ${{ secrets.EXPO_CLI_PASSWORD }}
+          expo-packager: npm
+      - run: npm install
+      - name: Run tests
+        run: |
+          npm test
+      - uses: rlespinasse/github-slug-action@v2.x
+      - run: expo publish --release-channel=${{ env.GITHUB_REF_SLUG }}
